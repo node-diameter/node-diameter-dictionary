@@ -10,7 +10,7 @@ var loki = require('lokijs');
 
 var dictionary = {};
 
-var dictionaryDbLocation = path.normalize(__dirname + '/dictionary.json');
+var dictionaryDbLocation = path.normalize(__dirname + '/loki_dictionary.json');
 var db = new loki(dictionaryDbLocation);
 
 var collections = [
@@ -174,9 +174,124 @@ var getDictionary = function() {
     return dictionaryDeferred.promise;
 };
 
+
+var getTypedefn = function(type, appId) {
+    var typedefn = dictionary.typedefns.find({
+        '$and': [{
+            'applicationId': {
+                '$eq': appId.toString()
+            }
+        }, {
+            'type-name': {
+                '$eq': type.toString()
+            }
+        }]
+    });
+    if (typedefn.length == 0 && appId !== '0') {
+        return getTypedefn(type, '0');
+    }
+    return typedefn[0];
+};
+
+var resolveToBaseType = function(type, appId) {
+    if (type == 'QoSFilterRule') return 'OctetString';
+    if (type == 'Float32') return 'Unsigned32';
+    if (type == 'Float64') return 'Unsigned64';
+    if (type == 'Address') return 'OctetString';
+    var parsableTypes = [
+        'OctetString',
+        'Unsigned32',
+        'Integer32',
+        'Unsigned64',
+        'Integer64',
+        'Time',
+        'IPAddress'
+        ];
+    var typedefn = getTypedefn(type, appId);
+    if (_.contains(parsableTypes, typedefn['type-name'])) {
+        return typedefn['type-name'];
+    } else if (typedefn['type-parent'] !== undefined) {
+        return resolveToBaseType(typedefn['type-parent'], appId);
+    }
+    throw new Error('Unable to resolve type ' + type + ' for app ' + appId);
+};
+
 console.log('Parsing diameter dictionaries...');
 getDictionary().then(function() {
-    console.log('Dictionaries parsed to dictionary.json');
+    console.log('Dictionaries parsed to loki_dictionary.json');
+    
+    // This part stores it in plain JSON
+    
+    var applications = dictionary.applications.find().map(function(app) {
+        return {
+            code: parseInt(app.id, 10),
+            name: app.name
+        };
+    });
+
+    var commands = dictionary.commands.find().map(function(com) {
+        var vendor = dictionary.vendors.findOne({
+                'vendor-id': {
+                    '$eq': com['vendor-id']
+                }
+            });
+        var vendorId = vendor == null ? 0 : parseInt(vendor.code, 10);
+        
+        return {
+            code: parseInt(com.code, 10),
+            name: com.name,
+            vendorId: vendorId
+        };
+    });
+    
+    var avps = dictionary.avps.find().map(function(a) {
+        var vendor = dictionary.vendors.findOne({
+                'vendor-id': {
+                    '$eq': a['vendor-id']
+                }
+            });
+        var vendorId = vendor == null ? 0 : parseInt(vendor.code, 10);
+           
+        var avp =  {
+            code: parseInt(a.code, 10),
+            name: a.name,
+            vendorId: vendorId,
+            type: a.type == null ? undefined : resolveToBaseType(a.type, a.applicationId),
+            flags: {
+                mandatory: a.mandatory == 'must',
+                'protected': a['protected'] == 'may',
+                mayEncrypt: a['may-encrypt'] == 'yes',
+                vendorBit: a['vendor-bit'] == 'must'
+            }
+        };
+        
+        if (a.gavps != null) {
+            avp.groupedAvps = a.gavps;
+            avp.type = 'Grouped';
+        }
+        
+        if (a.enums != null) {
+            avp.enums = _.map(a.enums, function(e) {
+                return {code: parseInt(e.code, 10), name: e.name};
+            });
+        }
+        
+        return avp;
+    });
+    
+    var dict = {
+        applications: _.sortBy(applications, 'code'),
+        commands: _.sortBy(commands, 'code'),
+        avps: _.sortBy(avps, 'code')
+    };
+    
+    fs.writeFile('dictionary.json', JSON.stringify(dict, null, 4), function(err) {
+    if(err) {
+      console.log(err);
+    } else {
+      console.log("JSON saved to " + 'dictionary.json');
+    }
+}); 
 }, function(err) {
     console.log('Error: ' + err);
 }).done();
