@@ -30,7 +30,7 @@ var initDb = function() {
 
 var parseDictionaryFiles = function(dictionaryFiles) {
     var deferred = Q.defer();
-    
+
     var saxStream = sax.createStream(false, {lowercase: true});
     saxStream.setMaxListeners(100);
 
@@ -124,7 +124,7 @@ var parseDictionaryFiles = function(dictionaryFiles) {
             tagHandler(node);
         }
     });
-    
+
     saxStream.on('closetag', function (tag) {
         currentTags[tag] = null;
     });
@@ -135,14 +135,14 @@ var parseDictionaryFiles = function(dictionaryFiles) {
             dictionaryFiles = _.dropRight(dictionaryFiles);
         } else {
             db.save(function() {
-                deferred.resolve(dictionary); 
+                deferred.resolve(dictionary);
             });
         }
     });
 
     fs.createReadStream(_.last(dictionaryFiles)).pipe(saxStream);
     dictionaryFiles = _.dropRight(dictionaryFiles);
-    
+
     return deferred.promise;
 };
 
@@ -165,7 +165,7 @@ var getDictionary = function() {
                 return path.normalize(dictionariesLocation + '/' + file);
             }).value();
         if (files.length > 0) {
-            parseDictionaryFiles(files).then(dictionaryDeferred.resolve, 
+            parseDictionaryFiles(files).then(dictionaryDeferred.resolve,
                     dictionaryDeferred.reject);
         } else {
             dictionaryDeferred.reject('Dictionary files not found');
@@ -219,9 +219,9 @@ var resolveToBaseType = function(type, appId) {
 console.log('Parsing diameter dictionaries...');
 getDictionary().then(function() {
     console.log('Dictionaries parsed to loki_dictionary.json');
-    
+
     // This part stores it in plain JSON
-    
+
     var applications = dictionary.applications.find().map(function(app) {
         return {
             code: parseInt(app.id, 10),
@@ -236,14 +236,14 @@ getDictionary().then(function() {
                 }
             });
         var vendorId = vendor == null ? 0 : parseInt(vendor.code, 10);
-        
+
         return {
             code: parseInt(com.code, 10),
             name: com.name,
             vendorId: vendorId
         };
     });
-    
+
     var avps = dictionary.avps.find().map(function(a) {
         var vendor = dictionary.vendors.findOne({
                 'vendor-id': {
@@ -251,7 +251,7 @@ getDictionary().then(function() {
                 }
             });
         var vendorId = vendor == null ? 0 : parseInt(vendor.code, 10);
-           
+
         var avp =  {
             code: parseInt(a.code, 10),
             name: a.name,
@@ -264,34 +264,34 @@ getDictionary().then(function() {
                 vendorBit: a['vendor-bit'] == 'must'
             }
         };
-        
+
         if (a.gavps != null) {
             avp.groupedAvps = a.gavps;
             avp.type = 'Grouped';
         }
-        
+
         if (a.enums != null) {
             avp.enums = _.map(a.enums, function(e) {
                 return {code: parseInt(e.code, 10), name: e.name};
             });
         }
-        
+
         return avp;
     });
-    
+
     var dict = {
         applications: _.sortBy(applications, 'code'),
         commands: _.sortBy(commands, 'code'),
         avps: _.sortBy(avps, 'code')
     };
-    
+
     fs.writeFile('dictionary.json', JSON.stringify(dict, null, 4), function(err) {
     if(err) {
       console.log(err);
     } else {
       console.log("JSON saved to " + 'dictionary.json');
     }
-}); 
+});
 }, function(err) {
     console.log('Error: ' + err);
 }).done();
