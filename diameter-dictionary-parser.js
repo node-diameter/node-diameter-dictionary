@@ -136,13 +136,13 @@ var parseDictionaryFile = function(dictionaryFile) {
         });
     });
 
-    var parentXml = fs.readFileSync(dictionaryFile, 'utf-8');
+    var xml = fs.readFileSync(dictionaryFile, 'utf-8');
 
     var entityMap = {};
     var entityRe = /<!ENTITY\s+(.+?)\s+SYSTEM\s+"(.+)"\s*>/g;
     var tokens;
 
-    while (tokens = entityRe.exec(parentXml)) {
+    while (tokens = entityRe.exec(xml)) {
         var entityName = tokens[1];
         var entityUri = tokens[2];
         var entityPath = path.join(path.dirname(dictionaryFile), entityUri);
@@ -152,14 +152,14 @@ var parseDictionaryFile = function(dictionaryFile) {
             .replace(/<\?xml.+\?>/, '');
     }
 
-    parentXml = parentXml.replace(/\&([^;]+);/g, function(s, entityName) {
+    xml = xml.replace(/\&([^;]+);/g, function(s, entityName) {
         return entityMap[entityName] || s;
     });
 
-    var parentStream = new Readable();
-    parentStream.push(parentXml);
-    parentStream.push(null);
-    parentStream.pipe(saxStream);
+    var xmlStream = new Readable();
+    xmlStream.push(xml);
+    xmlStream.push(null);
+    xmlStream.pipe(saxStream);
 
     return deferred.promise;
 };
