@@ -1,6 +1,7 @@
 'use strict';
 
 var fs = require('fs');
+var Readable = require('stream').Readable;
 var path = require('path');
 var _ = require('lodash');
 var sax = require('sax');
@@ -28,7 +29,7 @@ var initDb = function() {
     });
 };
 
-var parseDictionaryFiles = function(dictionaryFiles) {
+var parseDictionaryFile = function(dictionaryFile) {
     var deferred = Q.defer();
 
     var saxStream = sax.createStream(false, {lowercase: true});
@@ -130,47 +131,48 @@ var parseDictionaryFiles = function(dictionaryFiles) {
     });
 
     saxStream.on('end', function () {
-        if (dictionaryFiles.length > 0) {
-            fs.createReadStream(_.last(dictionaryFiles)).pipe(saxStream);
-            dictionaryFiles = _.dropRight(dictionaryFiles);
-        } else {
-            db.save(function() {
-                deferred.resolve(dictionary);
-            });
-        }
+        db.save(function() {
+            deferred.resolve(dictionary);
+        });
     });
 
-    fs.createReadStream(_.last(dictionaryFiles)).pipe(saxStream);
-    dictionaryFiles = _.dropRight(dictionaryFiles);
+    var xml = fs.readFileSync(dictionaryFile, 'utf-8');
+
+    var entityMap = {};
+    var entityRe = /<!ENTITY\s+(.+?)\s+SYSTEM\s+"(.+)"\s*>/g;
+    var tokens;
+
+    while (tokens = entityRe.exec(xml)) {
+        var entityName = tokens[1];
+        var entityUri = tokens[2];
+        var entityPath = path.join(path.dirname(dictionaryFile), entityUri);
+
+        entityMap[entityName] = fs
+            .readFileSync(entityPath, 'utf-8')
+            .replace(/<\?xml.+\?>/, '');
+    }
+
+    xml = xml.replace(/\&([^;]+);/g, function(s, entityName) {
+        return entityMap[entityName] || s;
+    });
+
+    var xmlStream = new Readable();
+    xmlStream.push(xml);
+    xmlStream.push(null);
+    xmlStream.pipe(saxStream);
 
     return deferred.promise;
 };
 
 var dictionaryDeferred = Q.defer();
 var getDictionary = function() {
-    var dictionariesLocation = path.normalize(__dirname + '/dictionaries');
+    var dictionaryLocation = path.join(__dirname, 'dictionaries', 'dictionary.xml');
 
     initDb();
 
-    fs.readdir(dictionariesLocation, function(error, files) {
-        if (!_.isEmpty(error)) {
-            dictionaryDeferred.reject('Error reading dictionary files: ' + error);
-            return;
-        }
-        files = _(files)
-            .filter(function(file) {
-                return _.endsWith(file.toLowerCase(), '.xml');
-            })
-            .map(function(file) {
-                return path.normalize(dictionariesLocation + '/' + file);
-            }).value();
-        if (files.length > 0) {
-            parseDictionaryFiles(files).then(dictionaryDeferred.resolve,
-                    dictionaryDeferred.reject);
-        } else {
-            dictionaryDeferred.reject('Dictionary files not found');
-        }
-    });
+    parseDictionaryFile(dictionaryLocation).then(dictionaryDeferred.resolve,
+            dictionaryDeferred.reject);
+
     return dictionaryDeferred.promise;
 };
 
