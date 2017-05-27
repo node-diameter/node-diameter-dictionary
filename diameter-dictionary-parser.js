@@ -202,6 +202,7 @@ var resolveToBaseType = function(type, appId) {
     if (type == 'Address') return 'OctetString';
     var parsableTypes = [
         'OctetString',
+        'UTF8String',
         'Unsigned32',
         'Integer32',
         'Unsigned64',
