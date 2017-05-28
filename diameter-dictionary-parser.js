@@ -196,12 +196,15 @@ var getTypedefn = function(type, appId) {
 };
 
 var resolveToBaseType = function(type, appId) {
-    if (type == 'QoSFilterRule') return 'OctetString';
+    if (type == 'QoSFilterRule') return 'UTF8String';
     if (type == 'Float32') return 'Unsigned32';
     if (type == 'Float64') return 'Unsigned64';
     if (type == 'Address') return 'OctetString';
+    if (type == 'DiameterIdentity') return 'UTF8String';
+    if (type == 'IPFilterRule') return 'UTF8String';
     var parsableTypes = [
         'OctetString',
+        'UTF8String',
         'Unsigned32',
         'Integer32',
         'Unsigned64',
