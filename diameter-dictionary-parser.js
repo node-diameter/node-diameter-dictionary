@@ -103,9 +103,13 @@ var parseDictionaryFile = function(dictionaryFile) {
             parent.enums.push(node.attributes);
             dictionary.avps.update(parent);
         },
-        gavp: function(node) {
+        grouped: function(node) {
             var parent = currentTags.avp;
             parent.grouped = true;
+            dictionary.avps.update(parent);
+        },
+        gavp: function(node) {
+            var parent = currentTags.avp;
             if (parent.gavps == null) {
                 parent.gavps = [];
             }
@@ -270,7 +274,7 @@ getDictionary().then(function() {
             }
         };
 
-        if (a.gavps != null) {
+        if (a.grouped) {
             avp.groupedAvps = a.gavps;
             avp.type = 'Grouped';
         }
