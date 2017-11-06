@@ -290,8 +290,8 @@ getDictionary().then(function() {
 
     var dict = {
         applications: _.sortBy(applications, 'code'),
-        commands: _.sortBy(commands, 'code'),
-        avps: _.sortBy(avps, 'code')
+        commands: _.sortBy(commands, [ 'code', 'vendorId' ]),
+        avps: _.sortBy(avps, [ 'code', 'vendorId' ])
     };
 
     fs.writeFile('dictionary.json', JSON.stringify(dict, null, 4), function(err) {
