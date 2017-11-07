@@ -66,12 +66,27 @@ var parseDictionaryFile = function(dictionaryFile) {
          },
         avp: function(node) {
             var avp = node.attributes;
-            avp.applicationId = currentTags.application.id;
-            currentTags.avp = insertOrFind(dictionary.avps, avp,
-                { '$and': [
-                    { 'applicationId': { '$eq': avp.applicationId.toString() } },
-                    { 'code': { '$eq': avp.code.toString() } }
-                ] });
+            if (currentTags.application) {
+                avp.applicationId = currentTags.application.id;
+                currentTags.avp = insertOrFind(dictionary.avps, avp,
+                    { '$and': [
+                        { 'applicationId': { '$eq': avp.applicationId.toString() } },
+                        { 'code': { '$eq': avp.code.toString() } }
+                    ] });
+            } else if (currentTags.vendors) {
+                if (currentTags.vendors instanceof Array) {
+                    throw new Error('Expected vendor as parent element');
+                }
+                avp.applicationId = 0;
+                avp.vendorId = currentTags.vendors['vendor-id'];
+                currentTags.avp = insertOrFind(dictionary.avps, avp,
+                    { '$and': [
+                        { 'vendorId': { '$eq': avp.vendorId.toString() } },
+                        { 'code': { '$eq': avp.code.toString() } }
+                    ] });
+            } else {
+                throw new Error('Neither the application nor the vendor is known');
+            }
         },
         base: function() {
             var baseApp = {

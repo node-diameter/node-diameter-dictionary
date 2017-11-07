@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<application id="16777305" name="HP Diameter Topology Discovery" uri="http://www.iana.org/assignments/aaa-parameters/aaa-parameters.xml">
-	<command name="Peer Information"	code="100" vendor-id="HP">
-	<command name="Fetch Peers"		code="101" vendor-id="HP">
-	<command name="Subscribe Change"	code="102" vendor-id="HP">
-	<command name="Notify Change"		code="103" vendor-id="HP">
+<vendor vendor-id="HP"				code="11"	name="Hewlett Packard"/>
+
+<application id="16777305" name="HP Diameter Topology Discovery" uri="none">
+	<command name="Peer Information"	code="100" vendor-id="HP"/>
+	<command name="Fetch Peers"		code="101" vendor-id="HP"/>
+	<command name="Subscribe Change"	code="102" vendor-id="HP"/>
+	<command name="Notify Change"		code="103" vendor-id="HP"/>
 
 	<avp name="Peer-State" code="200"  vendor-id="HP" mandatory="must" vendor-bit="must">
 		<type type-name="Enumerated"/>
