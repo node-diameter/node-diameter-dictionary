@@ -1,8 +1,8 @@
-# node-diameter-dictionary-parser
+# node-diameter-dictionary
 
-Wireshark dictionaries parser for node-diameter
+Collated Wireshark dictionaries for Diameter
 
-to run:
+To build:
 ````bash
-$ npm start
+$ npm run build
 ````
