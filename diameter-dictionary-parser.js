@@ -229,7 +229,8 @@ var resolveToBaseType = function(type, appId) {
         'Unsigned64',
         'Integer64',
         'Time',
-        'IPAddress'
+        'IPAddress',
+        'AppId'
         ];
     var typedefn = getTypedefn(type, appId);
     if (_.contains(parsableTypes, typedefn['type-name'])) {
