@@ -310,11 +310,11 @@ getDictionary().then(function() {
         avps: _.sortBy(avps, [ 'code', 'vendorId' ])
     };
 
-    fs.writeFile('dictionary.json', JSON.stringify(dict, null, 4), function(err) {
+    fs.writeFile('dist/dictionary.json', JSON.stringify(dict, null, 4), function(err) {
     if(err) {
       console.log(err);
     } else {
-      console.log("JSON saved to " + 'dictionary.json');
+      console.log("JSON saved to " + 'dist/dictionary.json');
     }
 });
 }, function(err) {
