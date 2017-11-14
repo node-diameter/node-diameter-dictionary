@@ -1,28 +1,28 @@
 {
-  "name": "diameter-dictionary-parser",
+  "name": "diameter-dictionary",
   "version": "1.0.0",
-  "description": "Diameter dictionary parser for Wireshark dictionaries",
+  "description": "Collated Wireshark dictionaries for Diameter",
   "author": "Robert Kovacevic <robert.kovacevic1@gmail.com>",
+  "contributors": [
+      "Ates Goral <ates@magnetiq.com>"
+  ],
   "license": "GPL-3.0",
-  "main": "./diameter-dictionary-parser",
+  "main": "dist/dictionary.json",
   "repository": {
     "type": "git",
-    "url": "git://github.com/node-diameter/node-diameter-dictionary-parser.git"
+    "url": "git://github.com/node-diameter/node-diameter-dictionary.git"
   },
-  "engines": {
-    "node": ">=0.10.0"
-  },
-  "dependencies": {
-    "chalk": "^1.0.0",
-    "ipaddr.js": "^1.0.1",
+  "devDependencies": {
     "lodash": "^3.0.0",
     "lokijs": "^1.3.0",
-    "long": "^2.2.0",
     "q": "^1.2.0",
-    "sax": "^1.0.0"
+    "sax": "^1.0.0",
+    "napa": "3.0.0"
   },
   "scripts": {
-    "start": "node diameter-dictionary-parser.js"
+    "install": "napa git://github.com/wireshark/wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4",
+    "postinstall": "node build.js",
+    "build": "node build.js"
   },
   "keywords": [
     "diameter", "protocol", "rfc6733", "dictionary"

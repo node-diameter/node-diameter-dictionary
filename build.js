@@ -185,7 +185,7 @@ var parseDictionaryFile = function(dictionaryFile) {
 
 var dictionaryDeferred = Q.defer();
 var getDictionary = function() {
-    var dictionaryLocation = path.join(__dirname, 'dictionaries', 'dictionary.xml');
+    var dictionaryLocation = path.join(__dirname, 'node_modules', 'wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4',  'diameter', 'dictionary.xml');
 
     initDb();
 
@@ -310,11 +310,11 @@ getDictionary().then(function() {
         avps: _.sortBy(avps, [ 'code', 'vendorId' ])
     };
 
-    fs.writeFile('dictionary.json', JSON.stringify(dict, null, 4), function(err) {
+    fs.writeFile('dist/dictionary.json', JSON.stringify(dict, null, 4), function(err) {
     if(err) {
       console.log(err);
     } else {
-      console.log("JSON saved to " + 'dictionary.json');
+      console.log("JSON saved to " + 'dist/dictionary.json');
     }
 });
 }, function(err) {
