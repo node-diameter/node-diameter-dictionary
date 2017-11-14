@@ -185,7 +185,7 @@ var parseDictionaryFile = function(dictionaryFile) {
 
 var dictionaryDeferred = Q.defer();
 var getDictionary = function() {
-    var dictionaryLocation = path.join(__dirname, 'dictionaries', 'dictionary.xml');
+    var dictionaryLocation = path.join(__dirname, 'node_modules', 'wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4',  'diameter', 'dictionary.xml');
 
     initDb();
 
