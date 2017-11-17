@@ -20,7 +20,7 @@
     "napa": "3.0.0"
   },
   "scripts": {
-    "install": "napa git://github.com/wireshark/wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4",
+    "install": "./node_modules/.bin/napa git://github.com/wireshark/wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4",
     "postinstall": "node build.js",
     "build": "node build.js"
   },
