@@ -1,6 +1,6 @@
 {
   "name": "diameter-dictionary",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Collated Wireshark dictionaries for Diameter",
   "author": "Robert Kovacevic <robert.kovacevic1@gmail.com>",
   "contributors": [
@@ -20,8 +20,7 @@
     "napa": "3.0.0"
   },
   "scripts": {
-    "install": "./node_modules/.bin/napa git://github.com/wireshark/wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4",
-    "postinstall": "node build.js",
+    "prepublish": "./node_modules/.bin/napa git://github.com/wireshark/wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4 && node build.js",
     "build": "node build.js"
   },
   "keywords": [

@@ -3,8 +3,6 @@ node_js:
   - "6"
   - "6.1"
   - "5.11"
-  - "0.10"
-  - "iojs"
 deploy:
   provider: npm
   email: "$EMAIL"
