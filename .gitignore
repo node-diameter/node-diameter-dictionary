@@ -1,6 +1,7 @@
 .DS_Store
 npm-debug.log
 node_modules
-
+dist/*
+diameter_pcrf.xml
 loki_dictionary.json
 dictionaries/*

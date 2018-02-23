@@ -62,7 +62,7 @@ var parseDictionaryFile = function(dictionaryFile) {
         },
         vendor: function(node) {
             currentTags.vendors = insertOrFind(dictionary.vendors, node.attributes,
-                { 'id': { '$eq': node.attributes['vendor-id'].toString() } });
+                { 'id': { '$eq': node.attributes['id'].toString() } });
          },
         avp: function(node) {
             var avp = node.attributes;
@@ -106,25 +106,21 @@ var parseDictionaryFile = function(dictionaryFile) {
                 ] });
         },
         type: function(node) {
-            var parent = currentTags.avp;
-            parent.type = node.attributes['type-name'];
-            dictionary.avps.update(parent);
+            // var parent = currentTags.avp;
+            // parent.type = node.attributes['type-name'];
+            // dictionary.avps.update(parent);
         },
         'enum': function(node) {
-            var parent = currentTags.avp;
-            if (parent.enums == null) {
-                parent.enums = [];
-            }
-            parent.enums.push(node.attributes);
-            dictionary.avps.update(parent);
+            currentTags['enum'] = node;
         },
         grouped: function(node) {
             var parent = currentTags.avp;
             parent.grouped = true;
             dictionary.avps.update(parent);
         },
-        gavp: function(node) {
+        avpref: function(node) {
             var parent = currentTags.avp;
+            if (parent == null) return;
             if (parent.gavps == null) {
                 parent.gavps = [];
             }
@@ -135,6 +131,19 @@ var parseDictionaryFile = function(dictionaryFile) {
 
     saxStream.on('error', function(error) {
         deferred.reject(error);
+    });
+
+    saxStream.on('text', function(text) {
+        if (currentTags['enum'] == null) return;
+
+        var parent = currentTags.avp;
+        if (parent.enums == null) {
+            parent.enums = [];
+        }
+        currentTags['enum'].attributes.name = text.trim();
+        currentTags['enum'].attributes.code = currentTags['enum'].attributes.value;
+        parent.enums.push(currentTags['enum'].attributes);
+        dictionary.avps.update(parent);
     });
 
     saxStream.on('opentag', function (node) {
@@ -185,7 +194,7 @@ var parseDictionaryFile = function(dictionaryFile) {
 
 var dictionaryDeferred = Q.defer();
 var getDictionary = function() {
-    var dictionaryLocation = path.join(__dirname, 'node_modules', 'wireshark.git#9705f653daa134cbf63098ff44d5cebb021bffb4',  'diameter', 'dictionary.xml');
+    var dictionaryLocation = path.join(__dirname, 'diameter_pcrf.xml');
 
     initDb();
 
@@ -219,8 +228,16 @@ var resolveToBaseType = function(type, appId) {
     if (type == 'Float32') return 'Unsigned32';
     if (type == 'Float64') return 'Unsigned64';
     if (type == 'Address') return 'OctetString';
+    if (type == 'DiameterURI') return 'OctetString';
+    if (type == 'RadiusString') return 'OctetString';
     if (type == 'DiameterIdentity') return 'UTF8String';
     if (type == 'IPFilterRule') return 'UTF8String';
+    if (type == 'Enumerated') return 'Integer32';
+    if (type == 'Integer') return 'Integer32';
+    if (type == 'RadiusInteger') return 'Integer32';
+    if (type == 'RadiusIpaddress') return 'IPAddress';
+    if (type == 'IPv6Address') return 'IPAddress';
+
     var parsableTypes = [
         'OctetString',
         'UTF8String',
@@ -230,9 +247,10 @@ var resolveToBaseType = function(type, appId) {
         'Integer64',
         'Time',
         'IPAddress',
-        'AppId'
+        'AppId',
+        'Grouped'
         ];
-    var typedefn = getTypedefn(type, appId);
+    var typedefn = { 'type-name': type } //getTypedefn(type, appId);
     if (_.contains(parsableTypes, typedefn['type-name'])) {
         return typedefn['type-name'];
     } else if (typedefn['type-parent'] !== undefined) {
@@ -272,7 +290,7 @@ getDictionary().then(function() {
     var avps = dictionary.avps.find().map(function(a) {
         var vendor = dictionary.vendors.findOne({
                 'vendor-id': {
-                    '$eq': a['vendor-id']
+                    '$eq': a['vendor']
                 }
             });
         var vendorId = vendor == null ? 0 : parseInt(vendor.code, 10);
@@ -283,10 +301,10 @@ getDictionary().then(function() {
             vendorId: vendorId,
             type: a.type == null ? undefined : resolveToBaseType(a.type, a.applicationId),
             flags: {
-                mandatory: a.mandatory == 'must',
-                'protected': a['protected'] == 'may',
+                mandatory: a['mandatory-flag'] == 'must',
+                'protected': a['protected-flag'] == 'may',
                 mayEncrypt: a['may-encrypt'] == 'yes',
-                vendorBit: a['vendor-bit'] == 'must'
+                vendorBit: a['vendor-flag'] == 'must'
             }
         };
 
