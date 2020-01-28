@@ -233,7 +233,7 @@ var resolveToBaseType = function(type, appId) {
         'AppId'
         ];
     var typedefn = getTypedefn(type, appId);
-    if (_.contains(parsableTypes, typedefn['type-name'])) {
+    if (_.includes(parsableTypes, typedefn['type-name'])) {
         return typedefn['type-name'];
     } else if (typedefn['type-parent'] !== undefined) {
         return resolveToBaseType(typedefn['type-parent'], appId);

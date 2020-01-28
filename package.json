@@ -4,7 +4,7 @@
   "description": "Collated Wireshark dictionaries for Diameter",
   "author": "Robert Kovacevic <robert.kovacevic1@gmail.com>",
   "contributors": [
-      "Ates Goral <ates@magnetiq.com>"
+    "Ates Goral <ates@magnetiq.com>"
   ],
   "license": "GPL-3.0",
   "main": "dist/dictionary.json",
@@ -13,9 +13,9 @@
     "url": "git://github.com/node-diameter/node-diameter-dictionary.git"
   },
   "devDependencies": {
-    "lodash": "^3.0.0",
+    "lodash": "^4.17.15",
     "lokijs": "^1.3.0",
-    "q": "^1.2.0",
+    "q": "^1.5.1",
     "sax": "^1.0.0",
     "napa": "3.0.0"
   },
@@ -23,6 +23,9 @@
     "build": "./node_modules/.bin/napa git://github.com/wireshark/wireshark.git#bf38a67724d09be2f4032d979d8fc7d25f5a46ef && node build.js"
   },
   "keywords": [
-    "diameter", "protocol", "rfc6733", "dictionary"
+    "diameter",
+    "protocol",
+    "rfc6733",
+    "dictionary"
   ]
 }
