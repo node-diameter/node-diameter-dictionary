@@ -4,13 +4,19 @@ Collated Wireshark dictionaries for Diameter
 
 ## Build
 
-Clone a known tag (or latest) of the [Wireshark repo](https://github.com/wireshark/wireshark) and copy the contents of its diameter directory into the local dictionaries folder.
-
-Then run:
+Run:
 
 ````bash
 $ npm run build
 ````
+
+to clone the latest or run
+
+````bash
+$ npm run build --commitid=0baad53fba83f1a704c50fccbb6adf63d05d39e4
+````
+
+to clone known commitid (replace sample one above with your desired one) of the [Wireshark repo](https://github.com/wireshark/wireshark).
 
 The collated JSON dictionary will be saved as dist/dictionary.json
 

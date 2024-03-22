@@ -20,8 +20,10 @@
     "napa": "3.0.0"
   },
   "scripts": {
-    "build": "./node_modules/.bin/napa git://github.com/wireshark/wireshark.git#bf38a67724d09be2f4032d979d8fc7d25f5a46ef && node build.js",
-    "postversion": "git push origin master --tags"
+    "build": "./node_modules/.bin/napa git+https://github.com/wireshark/wireshark.git#${npm_config_commitid} && node build.js ${npm_config_commitid}"
+  },
+  "napa-config": {
+    "cache": false
   },
   "keywords": [
     "diameter",
